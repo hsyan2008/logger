@@ -59,6 +59,7 @@ type _FILE struct {
 
 func SetConsole(isConsole bool) {
 	consoleAppender = isConsole
+	log.SetFlags(log.Ldate | log.Lmicroseconds)
 }
 
 func SetLevel(_level LEVEL) {
@@ -70,6 +71,7 @@ func SetRollingFile(fileDir, fileName string, maxNumber int32, maxSize int64, _u
 	maxFileSize = maxSize * int64(_unit)
 	RollingFile = true
 	dailyRolling = false
+	dirMk(fileDir)
 	logObj = &_FILE{dir: fileDir, filename: fileName, isCover: false, mu: new(sync.RWMutex)}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
@@ -82,7 +84,7 @@ func SetRollingFile(fileDir, fileName string, maxNumber int32, maxSize int64, _u
 	}
 	if !logObj.isMustRename() {
 		logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
-		logObj.lg = log.New(logObj.logfile, "", log.Ldate|log.Ltime|log.Lshortfile)
+		logObj.lg = log.New(logObj.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 	} else {
 		logObj.rename()
 	}
@@ -93,13 +95,14 @@ func SetRollingDaily(fileDir, fileName string) {
 	RollingFile = false
 	dailyRolling = true
 	t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
+	dirMk(fileDir)
 	logObj = &_FILE{dir: fileDir, filename: fileName, _date: &t, isCover: false, mu: new(sync.RWMutex)}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
 
 	if !logObj.isMustRename() {
 		logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
-		logObj.lg = log.New(logObj.logfile, "", log.Ldate|log.Ltime|log.Lshortfile)
+		logObj.lg = log.New(logObj.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 	} else {
 		logObj.rename()
 	}
@@ -138,9 +141,9 @@ func Debug(v ...interface{}) {
 
 	if logLevel <= DEBUG {
 		if logObj != nil {
-			logObj.lg.Output(2, fmt.Sprintln("debug", v))
+			logObj.lg.Output(2, fmt.Sprintln("[32mDEBUG[37m", v))
 		}
-		console("debug", v)
+		console("[32mDEBUG[37m", v)
 	}
 }
 func Info(v ...interface{}) {
@@ -154,9 +157,9 @@ func Info(v ...interface{}) {
 	}
 	if logLevel <= INFO {
 		if logObj != nil {
-			logObj.lg.Output(2, fmt.Sprintln("info", v))
+			logObj.lg.Output(2, fmt.Sprintln("INFO ", v))
 		}
-		console("info", v)
+		console("INFO ", v)
 	}
 }
 func Warn(v ...interface{}) {
@@ -171,9 +174,9 @@ func Warn(v ...interface{}) {
 
 	if logLevel <= WARN {
 		if logObj != nil {
-			logObj.lg.Output(2, fmt.Sprintln("warn", v))
+			logObj.lg.Output(2, fmt.Sprintln("[33mWARN[37m ", v))
 		}
-		console("warn", v)
+		console("[33mWARN[37m ", v)
 	}
 }
 func Error(v ...interface{}) {
@@ -187,9 +190,9 @@ func Error(v ...interface{}) {
 	}
 	if logLevel <= ERROR {
 		if logObj != nil {
-			logObj.lg.Output(2, fmt.Sprintln("error", v))
+			logObj.lg.Output(2, fmt.Sprintln("[31mERROR[37m", v))
 		}
-		console("error", v)
+		console("[31mERROR[37m", v)
 	}
 }
 func Fatal(v ...interface{}) {
@@ -203,9 +206,9 @@ func Fatal(v ...interface{}) {
 	}
 	if logLevel <= FATAL {
 		if logObj != nil {
-			logObj.lg.Output(2, fmt.Sprintln("fatal", v))
+			logObj.lg.Output(2, fmt.Sprintln("[35mFATAL[37m", v))
 		}
-		console("fatal", v)
+		console("[35mFATAL[37m", v)
 	}
 }
 
@@ -239,7 +242,7 @@ func (f *_FILE) rename() {
 			t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
 			f._date = &t
 			f.logfile, _ = os.Create(f.dir + "/" + f.filename)
-			f.lg = log.New(logObj.logfile, "\n", log.Ldate|log.Ltime|log.Lshortfile)
+			f.lg = log.New(logObj.logfile, "\n", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 		}
 	} else {
 		f.coverNextOne()
@@ -260,7 +263,7 @@ func (f *_FILE) coverNextOne() {
 	}
 	os.Rename(f.dir+"/"+f.filename, f.dir+"/"+f.filename+"."+strconv.Itoa(int(f._suffix)))
 	f.logfile, _ = os.Create(f.dir + "/" + f.filename)
-	f.lg = log.New(logObj.logfile, "\n", log.Ldate|log.Ltime|log.Lshortfile)
+	f.lg = log.New(logObj.logfile, "\n", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 }
 
 func fileSize(file string) int64 {
@@ -298,5 +301,12 @@ func fileCheck() {
 		logObj.mu.Lock()
 		defer logObj.mu.Unlock()
 		logObj.rename()
+	}
+}
+
+func dirMk(dir string) {
+	err := os.MkdirAll(dir, 0777)
+	if err != nil {
+		fmt.Println("创建目录失败：", err.Error())
 	}
 }
