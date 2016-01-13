@@ -1,7 +1,7 @@
 package example
 
 import (
-	"github.com/donnie4w/go-logger/logger"
+	"github.com/hsyan2008/go-logger/logger"
 	"runtime"
 	"strconv"
 	"testing"
