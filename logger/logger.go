@@ -59,7 +59,7 @@ type _FILE struct {
 
 func SetConsole(isConsole bool) {
 	consoleAppender = isConsole
-	log.SetFlags(log.Ldate | log.Lmicroseconds)
+	// log.SetFlags(log.Ldate | log.Lmicroseconds)
 }
 
 func SetLevel(_level LEVEL) {
@@ -119,6 +119,7 @@ func console(s ...interface{}) {
 			}
 		}
 		file = short
+		log.SetFlags(log.Ldate | log.Lmicroseconds)
 		log.Println(file, strconv.Itoa(line), s)
 	}
 }
