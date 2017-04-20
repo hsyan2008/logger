@@ -142,7 +142,7 @@ func Debug(v ...interface{}) {
 
 	if logLevel <= DEBUG {
 		if logObj != nil {
-			logObj.lg.Output(2, fmt.Sprintln("[32mDEBUG[37m", v))
+			logObj.lg.Output(2, fmt.Sprintln("DEBUG", v))
 		}
 		console("[32mDEBUG[37m", v)
 	}
@@ -175,7 +175,7 @@ func Warn(v ...interface{}) {
 
 	if logLevel <= WARN {
 		if logObj != nil {
-			logObj.lg.Output(2, fmt.Sprintln("[33mWARN[37m ", v))
+			logObj.lg.Output(2, fmt.Sprintln("WARN", v))
 		}
 		console("[33mWARN[37m ", v)
 	}
@@ -191,7 +191,7 @@ func Error(v ...interface{}) {
 	}
 	if logLevel <= ERROR {
 		if logObj != nil {
-			logObj.lg.Output(2, fmt.Sprintln("[31mERROR[37m", v))
+			logObj.lg.Output(2, fmt.Sprintln("ERROR", v))
 		}
 		console("[31mERROR[37m", v)
 	}
@@ -207,7 +207,7 @@ func Fatal(v ...interface{}) {
 	}
 	if logLevel <= FATAL {
 		if logObj != nil {
-			logObj.lg.Output(2, fmt.Sprintln("[35mFATAL[37m", v))
+			logObj.lg.Output(2, fmt.Sprintln("FATAL", v))
 		}
 		console("[35mFATAL[37m", v)
 	}
