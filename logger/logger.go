@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"runtime"
 	"strconv"
 	"strings"
@@ -72,7 +73,9 @@ func SetLevel(_level LEVEL) {
 	logLevel = _level
 }
 
-func SetRollingFile(fileDir, fileName string, maxNumber int32, maxSize int64, _unit UNIT) {
+func SetRollingFile(fileName string, maxNumber int32, maxSize int64, _unit UNIT) {
+	fileDir := path.Dir(fileName)
+	fileName = path.Base(fileName)
 	maxFileCount = maxNumber
 	maxFileSize = maxSize * int64(_unit)
 	RollingFile = true
@@ -97,7 +100,9 @@ func SetRollingFile(fileDir, fileName string, maxNumber int32, maxSize int64, _u
 	go fileMonitor()
 }
 
-func SetRollingDaily(fileDir, fileName string) {
+func SetRollingDaily(fileName string) {
+	fileDir := path.Dir(fileName)
+	fileName = path.Base(fileName)
 	RollingFile = false
 	dailyRolling = true
 	t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
@@ -181,7 +186,14 @@ func Fatal(v ...interface{}) {
 	Output(FATAL, "FATAL", v)
 }
 
+var checkMustRenameTime int64
+
 func (f *_FILE) isMustRename() bool {
+	//3秒检查一次，不然太频繁
+	if checkMustRenameTime != 0 && time.Now().Unix()-checkMustRenameTime < 3 {
+		return false
+	}
+	checkMustRenameTime = time.Now().Unix()
 	if dailyRolling {
 		t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
 		if t.After(*f._date) {
@@ -211,7 +223,7 @@ func (f *_FILE) rename() {
 			t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
 			f._date = &t
 			f.logfile, _ = os.Create(f.dir + "/" + f.filename)
-			f.lg = log.New(logObj.logfile, "\n", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+			f.lg = log.New(logObj.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 		}
 	} else {
 		f.coverNextOne()
@@ -232,11 +244,10 @@ func (f *_FILE) coverNextOne() {
 	}
 	os.Rename(f.dir+"/"+f.filename, f.dir+"/"+f.filename+"."+strconv.Itoa(int(f._suffix)))
 	f.logfile, _ = os.Create(f.dir + "/" + f.filename)
-	f.lg = log.New(logObj.logfile, "\n", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	f.lg = log.New(logObj.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 }
 
 func fileSize(file string) int64 {
-	fmt.Println("fileSize", file)
 	f, e := os.Stat(file)
 	if e != nil {
 		fmt.Println(e.Error())
