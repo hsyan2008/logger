@@ -26,6 +26,7 @@ var consoleAppender bool = true
 var RollingFile bool = false
 var logObj *_FILE
 var prefixStr = ""
+var logGoID = false
 
 const DATEFORMAT = "2006-01-02"
 
@@ -69,13 +70,35 @@ func SetPrefix(s string) {
 	prefixStr = s
 }
 
+func GetPrefix() string {
+	if logGoID {
+		return strings.TrimSpace("GoID:" + GoroutineID() + " " + prefixStr)
+	} else {
+		return prefixStr
+	}
+}
+
+func SetLogGoID(b bool) {
+	logGoID = b
+}
+
+func GoroutineID() string {
+	var buf [32]byte
+	n := runtime.Stack(buf[:], false)
+	return strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
+}
+
 func SetLevel(_level LEVEL) {
 	logLevel = _level
 }
+func SetLevelStr(level string) {
+	logLevel = getLogLevel(level)
+}
 
-func SetRollingFile(fileName string, maxNumber int32, maxSize int64, _unit UNIT) {
+func SetRollingFile(fileName string, maxNumber int32, maxSize int64, unit string) {
 	fileDir := path.Dir(fileName)
 	fileName = path.Base(fileName)
+	_unit := getLogUnit(unit)
 	maxFileCount = maxNumber
 	maxFileSize = maxSize * int64(_unit)
 	RollingFile = true
@@ -153,13 +176,14 @@ func Output(levelInt LEVEL, level string, v ...interface{}) {
 
 	if logLevel <= levelInt {
 		var levelAndPrefix string
-		if prefixStr == "" {
+		prefix := GetPrefix()
+		if prefix == "" {
 			levelAndPrefix = level + " "
 		} else {
-			levelAndPrefix = level + " " + prefixStr + " "
+			levelAndPrefix = level + " " + prefix + " "
 		}
 		if logObj != nil {
-			logObj.lg.Output(3, levelAndPrefix+trim(fmt.Sprint(v))+"\n")
+			_ = logObj.lg.Output(3, levelAndPrefix+trim(fmt.Sprint(v))+"\n")
 		}
 		console(levelAndPrefix, v)
 	}
@@ -167,7 +191,8 @@ func Output(levelInt LEVEL, level string, v ...interface{}) {
 
 //interface会在两端加了[]，去掉
 func trim(s string) string {
-	return strings.Trim(s, "[]")
+	s = strings.TrimSuffix(strings.TrimPrefix(s, "[[["), "]]]")
+	return strings.TrimSuffix(strings.TrimPrefix(s, "[["), "]]")
 }
 
 func Debug(v ...interface{}) {
@@ -214,7 +239,7 @@ func (f *_FILE) rename() {
 		fn := f.dir + "/" + f.filename + "." + f._date.Format(DATEFORMAT)
 		if !isExist(fn) && f.isMustRename() {
 			if f.logfile != nil {
-				f.logfile.Close()
+				_ = f.logfile.Close()
 			}
 			err := os.Rename(f.dir+"/"+f.filename, fn)
 			if err != nil {
@@ -237,12 +262,12 @@ func (f *_FILE) nextSuffix() int {
 func (f *_FILE) coverNextOne() {
 	f._suffix = f.nextSuffix()
 	if f.logfile != nil {
-		f.logfile.Close()
+		_ = f.logfile.Close()
 	}
 	if isExist(f.dir + "/" + f.filename + "." + strconv.Itoa(int(f._suffix))) {
-		os.Remove(f.dir + "/" + f.filename + "." + strconv.Itoa(int(f._suffix)))
+		_ = os.Remove(f.dir + "/" + f.filename + "." + strconv.Itoa(int(f._suffix)))
 	}
-	os.Rename(f.dir+"/"+f.filename, f.dir+"/"+f.filename+"."+strconv.Itoa(int(f._suffix)))
+	_ = os.Rename(f.dir+"/"+f.filename, f.dir+"/"+f.filename+"."+strconv.Itoa(int(f._suffix)))
 	f.logfile, _ = os.Create(f.dir + "/" + f.filename)
 	f.lg = log.New(logObj.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 }
@@ -288,5 +313,40 @@ func dirMk(dir string) {
 	err := os.MkdirAll(dir, 0777)
 	if err != nil {
 		fmt.Println("创建目录失败：", err.Error())
+	}
+}
+func getLogLevel(l string) LEVEL {
+	switch strings.ToUpper(l) {
+	case "ALL":
+		return ALL
+	case "DEBUG":
+		return DEBUG
+	case "INFO":
+		return INFO
+	case "WARN":
+		return WARN
+	case "ERROR":
+		return ERROR
+	case "FATAL":
+		return FATAL
+	case "OFF":
+		return OFF
+	default:
+		return ALL
+	}
+}
+
+func getLogUnit(u string) UNIT {
+	switch strings.ToUpper(u) {
+	case "K", "KB":
+		return KB
+	case "M", "MB":
+		return MB
+	case "G", "GB":
+		return GB
+	case "T", "TB":
+		return TB
+	default:
+		return KB
 	}
 }
