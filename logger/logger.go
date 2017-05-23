@@ -164,7 +164,7 @@ func catchError() {
 	}
 }
 
-func Output(levelInt LEVEL, level string, v ...interface{}) {
+func Output(level string, v ...interface{}) {
 	if dailyRolling {
 		fileCheck()
 	}
@@ -174,7 +174,7 @@ func Output(levelInt LEVEL, level string, v ...interface{}) {
 		defer logObj.mu.RUnlock()
 	}
 
-	if logLevel <= levelInt {
+	if logLevel <= getLogLevel(level) {
 		var levelAndPrefix string
 		prefix := GetPrefix()
 		if prefix == "" {
@@ -185,8 +185,30 @@ func Output(levelInt LEVEL, level string, v ...interface{}) {
 		if logObj != nil {
 			_ = logObj.lg.Output(3, levelAndPrefix+trim(fmt.Sprint(v))+"\n")
 		}
+		if prefix == "" {
+			levelAndPrefix = getColor(level) + " "
+		} else {
+			levelAndPrefix = getColor(level) + " " + prefix + " "
+		}
 		console(levelAndPrefix, v)
 	}
+}
+
+func getColor(level string) string {
+	var color string
+	switch level {
+	case "DEBUG":
+		color = "[32;1m"
+	case "INFO":
+		color = "[33;1m"
+	case "WARN":
+		color = "[35;1m"
+	case "ERROR":
+		color = "[31;1m"
+	case "FATAL":
+		color = "[31;7m"
+	}
+	return color + level + "[37;0m"
 }
 
 //interface会在两端加了[]，去掉
@@ -196,19 +218,19 @@ func trim(s string) string {
 }
 
 func Debug(v ...interface{}) {
-	Output(DEBUG, "DEBUG", v)
+	Output("DEBUG", v)
 }
 func Info(v ...interface{}) {
-	Output(INFO, "INFO", v)
+	Output("INFO", v)
 }
 func Warn(v ...interface{}) {
-	Output(WARN, "WARN", v)
+	Output("WARN", v)
 }
 func Error(v ...interface{}) {
-	Output(ERROR, "ERROR", v)
+	Output("ERROR", v)
 }
 func Fatal(v ...interface{}) {
-	Output(FATAL, "FATAL", v)
+	Output("FATAL", v)
 }
 
 var checkMustRenameTime int64
