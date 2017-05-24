@@ -213,8 +213,13 @@ func getColor(level string) string {
 
 //interface会在两端加了[]，去掉
 func trim(s string) string {
-	s = strings.TrimSuffix(strings.TrimPrefix(s, "[[["), "]]]")
-	return strings.TrimSuffix(strings.TrimPrefix(s, "[["), "]]")
+	if strings.HasPrefix(s, "[[[") && strings.HasSuffix(s, "]]]") {
+		s = strings.TrimSuffix(strings.TrimPrefix(s, "[[["), "]]]")
+	} else if strings.HasPrefix(s, "[[") && strings.HasSuffix(s, "]]") {
+		s = strings.TrimSuffix(strings.TrimPrefix(s, "[["), "]]")
+	}
+
+	return s
 }
 
 func Debug(v ...interface{}) {
