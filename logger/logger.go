@@ -225,17 +225,32 @@ func trim(s string) string {
 func Debug(v ...interface{}) {
 	Output("DEBUG", v)
 }
+func Debugf(f string, v ...interface{}) {
+	Output("DEBUG", fmt.Sprintf(f, v...))
+}
 func Info(v ...interface{}) {
 	Output("INFO", v)
+}
+func Infof(f string, v ...interface{}) {
+	Output("INFO", fmt.Sprintf(f, v...))
 }
 func Warn(v ...interface{}) {
 	Output("WARN", v)
 }
+func Warnf(f string, v ...interface{}) {
+	Output("WARN", fmt.Sprintf(f, v...))
+}
 func Error(v ...interface{}) {
 	Output("ERROR", v)
 }
+func Errorf(f string, v ...interface{}) {
+	Output("ERROR", fmt.Sprintf(f, v...))
+}
 func Fatal(v ...interface{}) {
 	Output("FATAL", v)
+}
+func Fatalf(f string, v ...interface{}) {
+	Output("FATAL", fmt.Sprintf(f, v...))
 }
 
 var checkMustRenameTime int64
