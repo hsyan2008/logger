@@ -41,8 +41,7 @@ const (
 )
 
 const (
-	ALL LEVEL = iota
-	DEBUG
+	DEBUG LEVEL = iota
 	INFO
 	WARN
 	ERROR
@@ -90,6 +89,9 @@ func GoroutineID() string {
 
 func SetLevel(_level LEVEL) {
 	logLevel = _level
+}
+func Level() LEVEL {
+	return logLevel
 }
 func SetLevelStr(level string) {
 	logLevel = getLogLevel(level)
@@ -164,7 +166,7 @@ func catchError() {
 	}
 }
 
-func Output(level string, v ...interface{}) {
+func Output(calldepth int, level string, v ...interface{}) {
 	if dailyRolling {
 		fileCheck()
 	}
@@ -183,7 +185,7 @@ func Output(level string, v ...interface{}) {
 			levelAndPrefix = level + " " + prefix + " "
 		}
 		if logObj != nil {
-			_ = logObj.lg.Output(3, levelAndPrefix+trim(fmt.Sprint(v))+"\n")
+			_ = logObj.lg.Output(calldepth, levelAndPrefix+trim(fmt.Sprint(v))+"\n")
 		}
 		if prefix == "" {
 			levelAndPrefix = getColor(level) + " "
@@ -223,34 +225,34 @@ func trim(s string) string {
 }
 
 func Debug(v ...interface{}) {
-	Output("DEBUG", v)
+	Output(3, "DEBUG", v)
 }
 func Debugf(f string, v ...interface{}) {
-	Output("DEBUG", fmt.Sprintf(f, v...))
+	Output(3, "DEBUG", fmt.Sprintf(f, v...))
 }
 func Info(v ...interface{}) {
-	Output("INFO", v)
+	Output(3, "INFO", v)
 }
 func Infof(f string, v ...interface{}) {
-	Output("INFO", fmt.Sprintf(f, v...))
+	Output(3, "INFO", fmt.Sprintf(f, v...))
 }
 func Warn(v ...interface{}) {
-	Output("WARN", v)
+	Output(3, "WARN", v)
 }
 func Warnf(f string, v ...interface{}) {
-	Output("WARN", fmt.Sprintf(f, v...))
+	Output(3, "WARN", fmt.Sprintf(f, v...))
 }
 func Error(v ...interface{}) {
-	Output("ERROR", v)
+	Output(3, "ERROR", v)
 }
 func Errorf(f string, v ...interface{}) {
-	Output("ERROR", fmt.Sprintf(f, v...))
+	Output(3, "ERROR", fmt.Sprintf(f, v...))
 }
 func Fatal(v ...interface{}) {
-	Output("FATAL", v)
+	Output(3, "FATAL", v)
 }
 func Fatalf(f string, v ...interface{}) {
-	Output("FATAL", fmt.Sprintf(f, v...))
+	Output(3, "FATAL", fmt.Sprintf(f, v...))
 }
 
 var checkMustRenameTime int64
@@ -359,8 +361,6 @@ func dirMk(dir string) {
 }
 func getLogLevel(l string) LEVEL {
 	switch strings.ToUpper(l) {
-	case "ALL":
-		return ALL
 	case "DEBUG":
 		return DEBUG
 	case "INFO":
@@ -374,7 +374,7 @@ func getLogLevel(l string) LEVEL {
 	case "OFF":
 		return OFF
 	default:
-		return ALL
+		return DEBUG
 	}
 }
 
