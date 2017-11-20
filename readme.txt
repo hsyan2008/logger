@@ -6,8 +6,8 @@ go-logger 是golang 的日志库 ，基于对golang内置log的封装。
 设置日志级别的方法为：logger.SetLevel() 如：logger.SetLevel(logger.WARN)
 则：logger.Debug(....),logger.Info(...) 日志不会打出，而 
  logger.Warn(...),logger.Error(...),logger.Fatal(...)日志会打出。
-设置日志级别的参数有7个，分别为：ALL，DEBUG，INFO，WARN，ERROR，FATAL，OFF
-其中 ALL表示所有调用打印日志的方法都会打出，而OFF则表示都不会打出。
+设置日志级别的参数有6个，分别为：DEBUG，INFO，WARN，ERROR，FATAL，OFF
+其中OFF表示都不会打出。
 
 
 日志文件切割有两种类型：1为按日期切分。2为按日志大小切分。
