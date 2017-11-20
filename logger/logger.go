@@ -185,7 +185,7 @@ func Output(calldepth int, level string, v ...interface{}) {
 			levelAndPrefix = level + " " + prefix + " "
 		}
 		if logObj != nil {
-			_ = logObj.lg.Output(calldepth, levelAndPrefix+strings.TrimSpace(fmt.Sprintln(v...))+"\n")
+			_ = logObj.lg.Output(calldepth, levelAndPrefix+fmt.Sprintln(v...))
 		}
 		if prefix == "" {
 			levelAndPrefix = getColor(level) + " "
