@@ -156,7 +156,7 @@ func console(levelAndPrefix string, s ...interface{}) {
 		}
 		file = short
 		log.SetFlags(log.Ldate | log.Lmicroseconds)
-		log.Println(file, strconv.Itoa(line), levelAndPrefix+trim(fmt.Sprint(s)))
+		log.Println(file, strconv.Itoa(line), levelAndPrefix+strings.TrimSpace(fmt.Sprintln(s...)))
 	}
 }
 
@@ -185,14 +185,14 @@ func Output(calldepth int, level string, v ...interface{}) {
 			levelAndPrefix = level + " " + prefix + " "
 		}
 		if logObj != nil {
-			_ = logObj.lg.Output(calldepth, levelAndPrefix+trim(fmt.Sprint(v))+"\n")
+			_ = logObj.lg.Output(calldepth, levelAndPrefix+strings.TrimSpace(fmt.Sprintln(v...))+"\n")
 		}
 		if prefix == "" {
 			levelAndPrefix = getColor(level) + " "
 		} else {
 			levelAndPrefix = getColor(level) + " " + prefix + " "
 		}
-		console(levelAndPrefix, v)
+		console(levelAndPrefix, v...)
 	}
 }
 
@@ -213,43 +213,32 @@ func getColor(level string) string {
 	return color + level + "[37;0m"
 }
 
-//interface会在两端加了[]，去掉
-func trim(s string) string {
-	if strings.HasPrefix(s, "[[[") && strings.HasSuffix(s, "]]]") {
-		s = strings.TrimSuffix(strings.TrimPrefix(s, "[[["), "]]]")
-	} else if strings.HasPrefix(s, "[[") && strings.HasSuffix(s, "]]") {
-		s = strings.TrimSuffix(strings.TrimPrefix(s, "[["), "]]")
-	}
-
-	return s
-}
-
 func Debug(v ...interface{}) {
-	Output(3, "DEBUG", v)
+	Output(3, "DEBUG", v...)
 }
 func Debugf(f string, v ...interface{}) {
 	Output(3, "DEBUG", fmt.Sprintf(f, v...))
 }
 func Info(v ...interface{}) {
-	Output(3, "INFO", v)
+	Output(3, "INFO", v...)
 }
 func Infof(f string, v ...interface{}) {
 	Output(3, "INFO", fmt.Sprintf(f, v...))
 }
 func Warn(v ...interface{}) {
-	Output(3, "WARN", v)
+	Output(3, "WARN", v...)
 }
 func Warnf(f string, v ...interface{}) {
 	Output(3, "WARN", fmt.Sprintf(f, v...))
 }
 func Error(v ...interface{}) {
-	Output(3, "ERROR", v)
+	Output(3, "ERROR", v...)
 }
 func Errorf(f string, v ...interface{}) {
 	Output(3, "ERROR", fmt.Sprintf(f, v...))
 }
 func Fatal(v ...interface{}) {
-	Output(3, "FATAL", v)
+	Output(3, "FATAL", v...)
 }
 func Fatalf(f string, v ...interface{}) {
 	Output(3, "FATAL", fmt.Sprintf(f, v...))
