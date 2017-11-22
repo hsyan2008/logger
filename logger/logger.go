@@ -308,7 +308,6 @@ func (f *_FILE) coverNextOne() {
 func fileSize(file string) int64 {
 	f, e := os.Stat(file)
 	if e != nil {
-		fmt.Println(e.Error())
 		return 0
 	}
 	return f.Size()
@@ -345,7 +344,7 @@ func fileCheck() {
 func dirMk(dir string) {
 	err := os.MkdirAll(dir, 0777)
 	if err != nil {
-		fmt.Println("创建目录失败：", err.Error())
+		panic("创建目录失败：" + err.Error())
 	}
 }
 func getLogLevel(l string) LEVEL {
