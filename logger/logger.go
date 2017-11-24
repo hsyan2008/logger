@@ -179,20 +179,24 @@ func Output(calldepth int, level string, v ...interface{}) {
 	if logLevel <= getLogLevel(level) {
 		var levelAndPrefix string
 		prefix := GetPrefix()
-		if prefix == "" {
-			levelAndPrefix = level + " "
-		} else {
-			levelAndPrefix = level + " " + prefix + " "
-		}
+		//print to file
 		if logObj != nil {
+			if prefix == "" {
+				levelAndPrefix = level + " "
+			} else {
+				levelAndPrefix = level + " " + prefix + " "
+			}
 			_ = logObj.lg.Output(calldepth, levelAndPrefix+fmt.Sprintln(v...))
 		}
-		if prefix == "" {
-			levelAndPrefix = getColor(level) + " "
-		} else {
-			levelAndPrefix = getColor(level) + " " + prefix + " "
+		//print to console
+		if consoleAppender {
+			if prefix == "" {
+				levelAndPrefix = getColor(level) + " "
+			} else {
+				levelAndPrefix = getColor(level) + " " + prefix + " "
+			}
+			console(levelAndPrefix, v...)
 		}
-		console(levelAndPrefix, v...)
 	}
 }
 
