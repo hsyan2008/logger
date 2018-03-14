@@ -201,6 +201,9 @@ func Output(calldepth int, level string, v ...interface{}) {
 }
 
 func getColor(level string) string {
+	if runtime.GOOS == "windows" {
+		return level
+	}
 	var color string
 	switch level {
 	case "DEBUG":
