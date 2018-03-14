@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -98,8 +98,8 @@ func SetLevelStr(level string) {
 }
 
 func SetRollingFile(fileName string, maxNumber int32, maxSize int64, unit string) {
-	fileDir := path.Dir(fileName)
-	fileName = path.Base(fileName)
+	fileDir := filepath.Dir(fileName)
+	fileName = filepath.Base(fileName)
 	_unit := getLogUnit(unit)
 	maxFileCount = maxNumber
 	maxFileSize = maxSize * int64(_unit)
@@ -126,8 +126,8 @@ func SetRollingFile(fileName string, maxNumber int32, maxSize int64, unit string
 }
 
 func SetRollingDaily(fileName string) {
-	fileDir := path.Dir(fileName)
-	fileName = path.Base(fileName)
+	fileDir := filepath.Dir(fileName)
+	fileName = filepath.Base(fileName)
 	RollingFile = false
 	dailyRolling = true
 	t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
