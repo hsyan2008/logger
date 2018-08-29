@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
@@ -91,10 +92,16 @@ func SetLogGoID(b bool) {
 	logGoID = b
 }
 
+var l = len("goroutine ")
+
 func GoroutineID() string {
 	var buf [32]byte
 	n := runtime.Stack(buf[:], false)
-	return strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
+
+	b := bytes.NewBuffer(buf[l:n])
+	s, _ := b.ReadString(' ')
+
+	return strings.TrimSpace(s)
 }
 
 func SetLevel(_level LEVEL) {
