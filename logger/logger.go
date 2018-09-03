@@ -122,7 +122,7 @@ func SetRollingFile(fileName string, maxNumber int32, maxSize int64, unit string
 	maxFileSize = maxSize * int64(_unit)
 	RollingFile = true
 	dailyRolling = false
-	dirMk(fileDir)
+	mkdir(fileDir)
 	logObj = &_FILE{dir: fileDir, filename: fileName, isCover: false, mu: new(sync.RWMutex)}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
@@ -148,7 +148,7 @@ func SetRollingDaily(fileName string) {
 	RollingFile = false
 	dailyRolling = true
 	t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
-	dirMk(fileDir)
+	mkdir(fileDir)
 	logObj = &_FILE{dir: fileDir, filename: fileName, _date: &t, isCover: false, mu: new(sync.RWMutex)}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
@@ -161,19 +161,11 @@ func SetRollingDaily(fileName string) {
 	}
 }
 
-func console(levelAndPrefix string, s ...interface{}) {
+func console(calldepth int, levelAndPrefix string, s ...interface{}) {
 	if consoleAppender {
-		_, file, line, _ := runtime.Caller(3)
-		short := file
-		for i := len(file) - 1; i > 0; i-- {
-			if file[i] == '/' {
-				short = file[i+1:]
-				break
-			}
-		}
-		file = short
+		_, file, line, _ := runtime.Caller(calldepth)
 		log.SetFlags(log.Ldate | log.Lmicroseconds)
-		log.Println(file, strconv.Itoa(line), levelAndPrefix+strings.TrimSpace(fmt.Sprintln(s...)))
+		log.Println(filepath.Base(file), strconv.Itoa(line), levelAndPrefix+strings.TrimSpace(fmt.Sprintln(s...)))
 	}
 }
 
@@ -212,7 +204,7 @@ func Output(calldepth int, level string, v ...interface{}) {
 			} else {
 				levelAndPrefix = getColor(level) + " " + prefix + " "
 			}
-			console(levelAndPrefix, v...)
+			console(calldepth, levelAndPrefix, v...)
 		}
 	}
 }
@@ -365,7 +357,7 @@ func fileCheck() {
 	}
 }
 
-func dirMk(dir string) {
+func mkdir(dir string) {
 	err := os.MkdirAll(dir, 0777)
 	if err != nil {
 		panic("创建目录失败：" + err.Error())
