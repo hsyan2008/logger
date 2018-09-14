@@ -68,6 +68,7 @@ func init() {
 
 //调整logger的设置
 func loggerAdjust(w http.ResponseWriter, r *http.Request) {
+	Info("change logger level to", r.FormValue("level"))
 	SetLevelStr(r.FormValue("level"))
 }
 
