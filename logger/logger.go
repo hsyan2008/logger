@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -60,16 +59,6 @@ type _FILE struct {
 	mu       *sync.RWMutex
 	logfile  *os.File
 	lg       *log.Logger
-}
-
-func init() {
-	http.HandleFunc("/logger/adjust", loggerAdjust)
-}
-
-//调整logger的设置
-func loggerAdjust(w http.ResponseWriter, r *http.Request) {
-	Info("change logger level to", r.FormValue("level"))
-	SetLevelStr(r.FormValue("level"))
 }
 
 func SetConsole(isConsole bool) {
