@@ -155,7 +155,7 @@ func console(calldepth int, levelAndPrefix string, s ...interface{}) {
 	if consoleAppender {
 		_, file, line, _ := runtime.Caller(calldepth)
 		log.SetFlags(log.Ldate | log.Lmicroseconds)
-		log.Println(filepath.Base(file), strconv.Itoa(line), levelAndPrefix+strings.TrimSpace(fmt.Sprintln(s...)))
+		log.Println(filepath.Base(file), line, levelAndPrefix+strings.TrimSpace(fmt.Sprintln(s...)))
 	}
 }
 
@@ -166,36 +166,36 @@ func catchError() {
 }
 
 func Output(calldepth int, level string, v ...interface{}) {
+	if logLevel > getLogLevel(level) {
+		return
+	}
+
 	if dailyRolling {
 		fileCheck()
 	}
 	defer catchError()
-	if logObj != nil {
-		logObj.mu.RLock()
-		defer logObj.mu.RUnlock()
-	}
 
-	if logLevel <= getLogLevel(level) {
-		var levelAndPrefix string
-		prefix := GetPrefix()
-		//print to file
-		if logObj != nil {
-			if prefix == "" {
-				levelAndPrefix = level + " "
-			} else {
-				levelAndPrefix = level + " " + prefix + " "
-			}
-			_ = logObj.lg.Output(calldepth, levelAndPrefix+fmt.Sprintln(v...))
+	var levelAndPrefix string
+	prefix := GetPrefix()
+	//print to file
+	if logObj != nil {
+		if prefix == "" {
+			levelAndPrefix = level + " "
+		} else {
+			levelAndPrefix = level + " " + prefix + " "
 		}
-		//print to console
-		if consoleAppender {
-			if prefix == "" {
-				levelAndPrefix = getColor(level) + " "
-			} else {
-				levelAndPrefix = getColor(level) + " " + prefix + " "
-			}
-			console(calldepth, levelAndPrefix, v...)
+		logObj.mu.RLock()
+		_ = logObj.lg.Output(calldepth, levelAndPrefix+fmt.Sprintln(v...))
+		logObj.mu.RUnlock()
+	}
+	//print to console
+	if consoleAppender {
+		if prefix == "" {
+			levelAndPrefix = getColor(level) + " "
+		} else {
+			levelAndPrefix = getColor(level) + " " + prefix + " "
 		}
+		console(calldepth, levelAndPrefix, v...)
 	}
 }
 
@@ -350,7 +350,7 @@ func fileCheck() {
 func mkdir(dir string) {
 	err := os.MkdirAll(dir, 0777)
 	if err != nil {
-		panic("创建目录失败：" + err.Error())
+		panic("create dir faild：" + err.Error())
 	}
 }
 func getLogLevel(l string) LEVEL {
