@@ -29,6 +29,8 @@ var logObj *_FILE
 var prefixStr = ""
 var logGoID = false
 
+var logConsole *log.Logger
+
 const DATEFORMAT = "2006-01-02"
 
 type UNIT int64
@@ -63,7 +65,7 @@ type _FILE struct {
 
 func SetConsole(isConsole bool) {
 	consoleAppender = isConsole
-	// log.SetFlags(log.Ldate | log.Lmicroseconds)
+	logConsole = log.New(os.Stdout, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 }
 
 func SetPrefix(s string) {
@@ -151,14 +153,6 @@ func SetRollingDaily(fileName string) {
 	}
 }
 
-func console(calldepth int, levelAndPrefix string, s ...interface{}) {
-	if consoleAppender {
-		_, file, line, _ := runtime.Caller(calldepth)
-		log.SetFlags(log.Ldate | log.Lmicroseconds)
-		log.Println(filepath.Base(file), line, levelAndPrefix+strings.TrimSpace(fmt.Sprintln(s...)))
-	}
-}
-
 func catchError() {
 	if err := recover(); err != nil {
 		log.Println("err", err)
@@ -175,28 +169,30 @@ func Output(calldepth int, level string, v ...interface{}) {
 	}
 	defer catchError()
 
-	var levelAndPrefix string
-	prefix := GetPrefix()
 	//print to file
 	if logObj != nil {
-		if prefix == "" {
-			levelAndPrefix = level + " "
-		} else {
-			levelAndPrefix = level + " " + prefix + " "
-		}
 		logObj.mu.RLock()
-		_ = logObj.lg.Output(calldepth, levelAndPrefix+fmt.Sprintln(v...))
+		_ = logObj.lg.Output(calldepth, getLevelAndPrefix(level, false)+fmt.Sprintln(v...))
 		logObj.mu.RUnlock()
 	}
 	//print to console
 	if consoleAppender {
-		if prefix == "" {
-			levelAndPrefix = getColor(level) + " "
-		} else {
-			levelAndPrefix = getColor(level) + " " + prefix + " "
-		}
-		console(calldepth, levelAndPrefix, v...)
+		_ = logConsole.Output(calldepth, getLevelAndPrefix(level, true)+fmt.Sprintln(v...))
 	}
+}
+
+func getLevelAndPrefix(level string, isConsole bool) (levelAndPrefix string) {
+	if isConsole {
+		level = getColor(level)
+	}
+	prefix := GetPrefix()
+	if len(prefix) == 0 {
+		levelAndPrefix = level + " "
+	} else {
+		levelAndPrefix = level + " " + prefix + " "
+	}
+
+	return levelAndPrefix
 }
 
 func getColor(level string) string {
