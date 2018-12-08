@@ -65,7 +65,9 @@ type _FILE struct {
 
 func SetConsole(isConsole bool) {
 	consoleAppender = isConsole
-	logConsole = log.New(os.Stdout, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	if isConsole && logConsole == nil {
+		logConsole = log.New(os.Stdout, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	}
 }
 
 func SetPrefix(s string) {
