@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -53,14 +54,19 @@ const (
 )
 
 type _FILE struct {
-	dir      string
-	filename string
+	filePath string //完整路径
+	dir      string //目录
+	filename string //文件名
 	_suffix  int
 	isCover  bool
 	_date    *time.Time
 	mu       *sync.RWMutex
 	logfile  *os.File
 	lg       *log.Logger
+}
+
+func init() {
+	_ = syscall.Umask(0)
 }
 
 func SetConsole(isConsole bool) {
@@ -117,19 +123,24 @@ func SetRollingFile(fileName string, maxNumber int32, maxSize int64, unit string
 	RollingFile = true
 	dailyRolling = false
 	mkdir(fileDir)
-	logObj = &_FILE{dir: fileDir, filename: fileName, isCover: false, mu: new(sync.RWMutex)}
+	logObj = &_FILE{
+		filePath: filepath.Join(fileDir, fileName),
+		dir:      fileDir,
+		filename: fileName,
+		isCover:  false,
+		mu:       new(sync.RWMutex),
+	}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
 	for i := 1; i <= int(maxNumber); i++ {
-		if isExist(fileDir + "/" + fileName + "." + strconv.Itoa(i)) {
+		if isExist(logObj.filePath + "." + strconv.Itoa(i)) {
 			logObj._suffix = i
 		} else {
 			break
 		}
 	}
 	if !logObj.isMustRename() {
-		logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
-		logObj.lg = log.New(logObj.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+		logObj.initFile()
 	} else {
 		logObj.rename()
 	}
@@ -143,13 +154,19 @@ func SetRollingDaily(fileName string) {
 	dailyRolling = true
 	t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
 	mkdir(fileDir)
-	logObj = &_FILE{dir: fileDir, filename: fileName, _date: &t, isCover: false, mu: new(sync.RWMutex)}
+	logObj = &_FILE{
+		filePath: filepath.Join(fileDir, fileName),
+		dir:      fileDir,
+		filename: fileName,
+		_date:    &t,
+		isCover:  false,
+		mu:       new(sync.RWMutex),
+	}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
 
 	if !logObj.isMustRename() {
-		logObj.logfile, _ = os.OpenFile(fileDir+"/"+fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
-		logObj.lg = log.New(logObj.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+		logObj.initFile()
 	} else {
 		logObj.rename()
 	}
@@ -263,7 +280,7 @@ func (f *_FILE) isMustRename() bool {
 		}
 	} else {
 		if maxFileCount > 1 {
-			if fileSize(f.dir+"/"+f.filename) >= maxFileSize {
+			if fileSize(f.filePath) >= maxFileSize {
 				return true
 			}
 		}
@@ -273,19 +290,18 @@ func (f *_FILE) isMustRename() bool {
 
 func (f *_FILE) rename() {
 	if dailyRolling {
-		fn := f.dir + "/" + f.filename + "." + f._date.Format(DATEFORMAT)
+		fn := f.filePath + "." + f._date.Format(DATEFORMAT)
 		if !isExist(fn) && f.isMustRename() {
 			if f.logfile != nil {
 				_ = f.logfile.Close()
 			}
-			err := os.Rename(f.dir+"/"+f.filename, fn)
+			err := os.Rename(f.filePath, fn)
 			if err != nil {
 				f.lg.Println("rename err", err.Error())
 			}
 			t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
 			f._date = &t
-			f.logfile, _ = os.Create(f.dir + "/" + f.filename)
-			f.lg = log.New(logObj.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+			f.initFile()
 		}
 	} else {
 		f.coverNextOne()
@@ -301,12 +317,16 @@ func (f *_FILE) coverNextOne() {
 	if f.logfile != nil {
 		_ = f.logfile.Close()
 	}
-	if isExist(f.dir + "/" + f.filename + "." + strconv.Itoa(int(f._suffix))) {
-		_ = os.Remove(f.dir + "/" + f.filename + "." + strconv.Itoa(int(f._suffix)))
+	if isExist(f.filePath + "." + strconv.Itoa(int(f._suffix))) {
+		_ = os.Remove(f.filePath + "." + strconv.Itoa(int(f._suffix)))
 	}
-	_ = os.Rename(f.dir+"/"+f.filename, f.dir+"/"+f.filename+"."+strconv.Itoa(int(f._suffix)))
-	f.logfile, _ = os.Create(f.dir + "/" + f.filename)
-	f.lg = log.New(logObj.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	_ = os.Rename(f.filePath, f.filePath+"."+strconv.Itoa(int(f._suffix)))
+	f.initFile()
+}
+
+func (f *_FILE) initFile() {
+	f.logfile, _ = os.OpenFile(f.filePath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	f.lg = log.New(f.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 }
 
 func fileSize(file string) int64 {
