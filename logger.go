@@ -66,7 +66,7 @@ type _FILE struct {
 }
 
 func init() {
-	_ = syscall.Umask(0)
+	_ = syscall.Umask(011)
 }
 
 func SetConsole(isConsole bool) {
