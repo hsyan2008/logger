@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 )
 
@@ -63,10 +62,6 @@ type _FILE struct {
 	mu       *sync.RWMutex
 	logfile  *os.File
 	lg       *log.Logger
-}
-
-func init() {
-	_ = syscall.Umask(011)
 }
 
 func SetConsole(isConsole bool) {
