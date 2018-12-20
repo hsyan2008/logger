@@ -29,7 +29,7 @@ var logObj *_FILE
 var prefixStr = ""
 var logGoID = false
 
-var logConsole *log.Logger
+var logConsole = log.New(os.Stdout, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 
 const DATEFORMAT = "2006-01-02"
 
@@ -66,9 +66,6 @@ type _FILE struct {
 
 func SetConsole(isConsole bool) {
 	consoleAppender = isConsole
-	if isConsole && logConsole == nil {
-		logConsole = log.New(os.Stdout, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
-	}
 }
 
 func SetPrefix(s string) {
