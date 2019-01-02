@@ -182,9 +182,7 @@ func Output(calldepth int, level string, v ...interface{}) {
 
 	//print to file
 	if logObj != nil {
-		logObj.mu.RLock()
 		_ = logObj.lg.Output(calldepth, getLevelAndPrefix(level, false)+fmt.Sprintln(v...))
-		logObj.mu.RUnlock()
 	}
 	//print to console
 	if consoleAppender {
