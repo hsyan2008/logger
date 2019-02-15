@@ -175,13 +175,13 @@ func Output(calldepth int, level string, v ...interface{}) {
 		return
 	}
 
-	if dailyRolling {
-		fileCheck()
-	}
 	defer catchError()
 
 	//print to file
 	if logObj != nil {
+		if dailyRolling {
+			fileCheck()
+		}
 		_ = logObj.lg.Output(calldepth, getLevelAndPrefix(level, false)+fmt.Sprintln(v...))
 	}
 	//print to console
