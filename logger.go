@@ -144,16 +144,22 @@ func SetRollingDaily(fileName string) {
 	fileName = filepath.Base(fileName)
 	RollingFile = false
 	dailyRolling = true
-	t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
 	mkdir(fileDir)
 	logObj = &_FILE{
 		filePath: filepath.Join(fileDir, fileName),
 		dir:      fileDir,
 		filename: fileName,
-		_date:    &t,
 		isCover:  false,
 		mu:       new(sync.RWMutex),
 	}
+	t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
+	if isExist(logObj.filePath) {
+		fi, err := os.Stat(logObj.filePath)
+		if err == nil {
+			t = fi.ModTime()
+		}
+	}
+	logObj._date = &t
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
 
@@ -258,13 +264,14 @@ func Fatalf(f string, v ...interface{}) {
 var checkMustRenameTime int64
 
 func (f *_FILE) isMustRename() bool {
+	now := time.Now()
 	//3秒检查一次，不然太频繁
-	if checkMustRenameTime != 0 && time.Now().Unix()-checkMustRenameTime < 3 {
+	if checkMustRenameTime != 0 && now.Unix()-checkMustRenameTime < 3 {
 		return false
 	}
-	checkMustRenameTime = time.Now().Unix()
+	checkMustRenameTime = now.Unix()
 	if dailyRolling {
-		t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
+		t, _ := time.Parse(DATEFORMAT, now.Format(DATEFORMAT))
 		if t.After(*f._date) {
 			return true
 		}
@@ -281,7 +288,7 @@ func (f *_FILE) isMustRename() bool {
 func (f *_FILE) rename() {
 	if dailyRolling {
 		fn := f.filePath + "." + f._date.Format(DATEFORMAT)
-		if !isExist(fn) && f.isMustRename() {
+		if !isExist(fn) {
 			if f.logfile != nil {
 				_ = f.logfile.Close()
 			}
