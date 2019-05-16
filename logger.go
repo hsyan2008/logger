@@ -176,7 +176,7 @@ func catchError() {
 	}
 }
 
-func Output(calldepth int, level string, v ...interface{}) {
+func Output(calldepth int, level, prefix string, v ...interface{}) {
 	if logLevel > getLogLevel(level) {
 		return
 	}
@@ -188,19 +188,18 @@ func Output(calldepth int, level string, v ...interface{}) {
 		if dailyRolling {
 			fileCheck()
 		}
-		_ = logObj.lg.Output(calldepth, getLevelAndPrefix(level, false)+fmt.Sprintln(v...))
+		_ = logObj.lg.Output(calldepth, getLevelAndPrefix(level, prefix, false)+fmt.Sprintln(v...))
 	}
 	//print to console
 	if consoleAppender {
-		_ = logConsole.Output(calldepth, getLevelAndPrefix(level, true)+fmt.Sprintln(v...))
+		_ = logConsole.Output(calldepth, getLevelAndPrefix(level, prefix, true)+fmt.Sprintln(v...))
 	}
 }
 
-func getLevelAndPrefix(level string, isConsole bool) (levelAndPrefix string) {
+func getLevelAndPrefix(level, prefix string, isConsole bool) (levelAndPrefix string) {
 	if isConsole {
 		level = getColor(level)
 	}
-	prefix := GetPrefix()
 	if len(prefix) == 0 {
 		levelAndPrefix = level + " "
 	} else {
@@ -231,34 +230,34 @@ func getColor(level string) string {
 }
 
 func Debug(v ...interface{}) {
-	Output(3, "DEBUG", v...)
+	Output(3, "DEBUG", GetPrefix(), v...)
 }
 func Debugf(f string, v ...interface{}) {
-	Output(3, "DEBUG", fmt.Sprintf(f, v...))
+	Output(3, "DEBUG", GetPrefix(), fmt.Sprintf(f, v...))
 }
 func Info(v ...interface{}) {
-	Output(3, "INFO", v...)
+	Output(3, "INFO", GetPrefix(), v...)
 }
 func Infof(f string, v ...interface{}) {
-	Output(3, "INFO", fmt.Sprintf(f, v...))
+	Output(3, "INFO", GetPrefix(), fmt.Sprintf(f, v...))
 }
 func Warn(v ...interface{}) {
-	Output(3, "WARN", v...)
+	Output(3, "WARN", GetPrefix(), v...)
 }
 func Warnf(f string, v ...interface{}) {
-	Output(3, "WARN", fmt.Sprintf(f, v...))
+	Output(3, "WARN", GetPrefix(), fmt.Sprintf(f, v...))
 }
 func Error(v ...interface{}) {
-	Output(3, "ERROR", v...)
+	Output(3, "ERROR", GetPrefix(), v...)
 }
 func Errorf(f string, v ...interface{}) {
-	Output(3, "ERROR", fmt.Sprintf(f, v...))
+	Output(3, "ERROR", GetPrefix(), fmt.Sprintf(f, v...))
 }
 func Fatal(v ...interface{}) {
-	Output(3, "FATAL", v...)
+	Output(3, "FATAL", GetPrefix(), v...)
 }
 func Fatalf(f string, v ...interface{}) {
-	Output(3, "FATAL", fmt.Sprintf(f, v...))
+	Output(3, "FATAL", GetPrefix(), fmt.Sprintf(f, v...))
 }
 
 var checkMustRenameTime int64
