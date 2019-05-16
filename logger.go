@@ -50,6 +50,7 @@ const (
 	ERROR
 	FATAL
 	OFF
+	UNKNOWN
 )
 
 type _FILE struct {
@@ -177,7 +178,8 @@ func catchError() {
 }
 
 func Output(calldepth int, level, prefix string, v ...interface{}) {
-	if logLevel > getLogLevel(level) {
+	l := getLogLevel(level)
+	if l == OFF || logLevel > l {
 		return
 	}
 
@@ -225,6 +227,8 @@ func getColor(level string) string {
 		color = "[31;1m"
 	case "FATAL":
 		color = "[31;7m"
+	case "UNKNOWN":
+		color = "[34;1m"
 	}
 	return color + level + "[37;0m"
 }

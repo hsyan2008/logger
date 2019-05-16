@@ -58,6 +58,6 @@ func (this *Log) Errorf(format string, v ...interface{}) {
 }
 
 func (this *Log) Output(calldepth int, s string) error {
-	Output(2+calldepth, "WARN", this.getPrefix(), s)
+	Output(2+calldepth, "UNKNOWN", this.getPrefix(), s)
 	return nil
 }
