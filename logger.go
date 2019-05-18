@@ -50,7 +50,7 @@ const (
 	ERROR
 	FATAL
 	OFF
-	UNKNOWN
+	MIX
 )
 
 type _FILE struct {
@@ -227,7 +227,7 @@ func getColor(level string) string {
 		color = "[31;1m"
 	case "FATAL":
 		color = "[31;7m"
-	case "UNKNOWN":
+	case "MIX":
 		color = "[34;1m"
 	}
 	return color + level + "[37;0m"
