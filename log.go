@@ -16,6 +16,14 @@ func NewLog() *Log {
 	}
 }
 
+func (this *Log) AppendPrefix(str string) {
+	this.prefixStr = fmt.Sprintf("%s %s", this.getPrefix(), str)
+}
+
+func (this *Log) SetPrefix(str string) {
+	this.prefixStr = str
+}
+
 func (this *Log) getPrefix() string {
 	if this.hasPrefix == false {
 		this.prefixStr = GetPrefix()
