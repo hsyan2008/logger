@@ -7,6 +7,7 @@ import (
 type Log struct {
 	hasPrefix bool
 	prefixStr string
+	traceID   string
 }
 
 func NewLog() *Log {
@@ -31,13 +32,20 @@ func (this *Log) ResetPrefix() {
 	this.hasPrefix = true
 }
 
+func (this *Log) SetTraceID(str string) {
+	this.traceID = fmt.Sprintf("traceid: %s", str)
+}
+
 func (this *Log) getPrefix() string {
 	if this.hasPrefix == false {
-		this.prefixStr = GetPrefix()
-		this.hasPrefix = true
+		this.ResetPrefix()
 	}
 
-	return this.prefixStr
+	if this.traceID == "" {
+		return this.prefixStr
+	}
+
+	return fmt.Sprintf(this.traceID, this.prefixStr)
 }
 
 func (this *Log) Debug(v ...interface{}) {
