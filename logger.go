@@ -391,6 +391,8 @@ func getLogLevel(l string) LEVEL {
 		return FATAL
 	case "OFF":
 		return OFF
+	case "MIX":
+		return MIX
 	default:
 		return DEBUG
 	}
