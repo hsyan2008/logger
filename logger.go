@@ -263,6 +263,12 @@ func Fatal(v ...interface{}) {
 func Fatalf(f string, v ...interface{}) {
 	Output(3, "FATAL", GetPrefix(), fmt.Sprintf(f, v...))
 }
+func Mix(v ...interface{}) {
+	Output(3, "MIX", GetPrefix(), v...)
+}
+func Mixf(f string, v ...interface{}) {
+	Output(3, "MIX", GetPrefix(), fmt.Sprintf(f, v...))
+}
 
 var checkMustRenameTime int64
 

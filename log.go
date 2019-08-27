@@ -88,6 +88,14 @@ func (this *Log) Fatalf(format string, v ...interface{}) {
 	Output(3, "FATAL", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
+func (this *Log) Mix(v ...interface{}) {
+	Output(3, "MIX", this.getPrefix(), v...)
+}
+
+func (this *Log) Mixf(format string, v ...interface{}) {
+	Output(3, "MIX", this.getPrefix(), fmt.Sprintf(format, v...))
+}
+
 func (this *Log) Output(calldepth int, s string) error {
 	Output(2+calldepth, "MIX", this.getPrefix(), s)
 	return nil
