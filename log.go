@@ -45,7 +45,7 @@ func (this *Log) getPrefix() string {
 		return this.prefixStr
 	}
 
-	return fmt.Sprintf(this.traceID, this.prefixStr)
+	return this.traceID + " " + this.prefixStr
 }
 
 func (this *Log) Debug(v ...interface{}) {
