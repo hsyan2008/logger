@@ -67,54 +67,93 @@ func (this *Logger) getPrefix() string {
 }
 
 func (this *Logger) Debug(v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "DEBUG", this.getPrefix(), v...)
 }
 
 func (this *Logger) Debugf(format string, v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "DEBUG", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Info(v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "INFO", this.getPrefix(), v...)
 }
 
 func (this *Logger) Infof(format string, v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "INFO", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Warn(v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "WARN", this.getPrefix(), v...)
 }
 
 func (this *Logger) Warnf(format string, v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "WARN", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Error(v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "ERROR", this.getPrefix(), v...)
 }
 
 func (this *Logger) Errorf(format string, v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "ERROR", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Fatal(v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "FATAL", this.getPrefix(), v...)
 }
 
 func (this *Logger) Fatalf(format string, v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "FATAL", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Mix(v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "MIX", this.getPrefix(), v...)
 }
 
 func (this *Logger) Mixf(format string, v ...interface{}) {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(3, "MIX", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Output(calldepth int, s string) error {
+	if this == nil {
+		*this = Logger{}
+	}
 	Output(2+calldepth, "MIX", this.getPrefix(), s)
 	return nil
 }
