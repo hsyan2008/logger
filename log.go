@@ -4,20 +4,23 @@ import (
 	"fmt"
 )
 
-type Log struct {
+type Logger struct {
 	hasPrefix bool
 	prefixStr string
 	traceID   string
 }
 
-func NewLog() *Log {
-	return &Log{
+func NewLogger() *Logger {
+	return &Logger{
 		hasPrefix: true,
 		prefixStr: GetPrefix(),
 	}
 }
 
-func (this *Log) AppendPrefix(str string) {
+func (this *Logger) AppendPrefix(str string) {
+	if this == nil {
+		*this = Logger{}
+	}
 	if this.hasPrefix == false {
 		this.ResetPrefix()
 	}
@@ -25,21 +28,33 @@ func (this *Log) AppendPrefix(str string) {
 	this.hasPrefix = true
 }
 
-func (this *Log) SetPrefix(str string) {
+func (this *Logger) SetPrefix(str string) {
+	if this == nil {
+		*this = Logger{}
+	}
 	this.prefixStr = str
 	this.hasPrefix = true
 }
 
-func (this *Log) ResetPrefix() {
+func (this *Logger) ResetPrefix() {
+	if this == nil {
+		*this = Logger{}
+	}
 	this.prefixStr = GetPrefix()
 	this.hasPrefix = true
 }
 
-func (this *Log) SetTraceID(str string) {
+func (this *Logger) SetTraceID(str string) {
+	if this == nil {
+		*this = Logger{}
+	}
 	this.traceID = fmt.Sprintf("traceid: %s", str)
 }
 
-func (this *Log) getPrefix() string {
+func (this *Logger) getPrefix() string {
+	if this == nil {
+		*this = Logger{}
+	}
 	if this.hasPrefix == false {
 		this.ResetPrefix()
 	}
@@ -51,55 +66,55 @@ func (this *Log) getPrefix() string {
 	return this.traceID + " " + this.prefixStr
 }
 
-func (this *Log) Debug(v ...interface{}) {
+func (this *Logger) Debug(v ...interface{}) {
 	Output(3, "DEBUG", this.getPrefix(), v...)
 }
 
-func (this *Log) Debugf(format string, v ...interface{}) {
+func (this *Logger) Debugf(format string, v ...interface{}) {
 	Output(3, "DEBUG", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
-func (this *Log) Info(v ...interface{}) {
+func (this *Logger) Info(v ...interface{}) {
 	Output(3, "INFO", this.getPrefix(), v...)
 }
 
-func (this *Log) Infof(format string, v ...interface{}) {
+func (this *Logger) Infof(format string, v ...interface{}) {
 	Output(3, "INFO", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
-func (this *Log) Warn(v ...interface{}) {
+func (this *Logger) Warn(v ...interface{}) {
 	Output(3, "WARN", this.getPrefix(), v...)
 }
 
-func (this *Log) Warnf(format string, v ...interface{}) {
+func (this *Logger) Warnf(format string, v ...interface{}) {
 	Output(3, "WARN", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
-func (this *Log) Error(v ...interface{}) {
+func (this *Logger) Error(v ...interface{}) {
 	Output(3, "ERROR", this.getPrefix(), v...)
 }
 
-func (this *Log) Errorf(format string, v ...interface{}) {
+func (this *Logger) Errorf(format string, v ...interface{}) {
 	Output(3, "ERROR", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
-func (this *Log) Fatal(v ...interface{}) {
+func (this *Logger) Fatal(v ...interface{}) {
 	Output(3, "FATAL", this.getPrefix(), v...)
 }
 
-func (this *Log) Fatalf(format string, v ...interface{}) {
+func (this *Logger) Fatalf(format string, v ...interface{}) {
 	Output(3, "FATAL", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
-func (this *Log) Mix(v ...interface{}) {
+func (this *Logger) Mix(v ...interface{}) {
 	Output(3, "MIX", this.getPrefix(), v...)
 }
 
-func (this *Log) Mixf(format string, v ...interface{}) {
+func (this *Logger) Mixf(format string, v ...interface{}) {
 	Output(3, "MIX", this.getPrefix(), fmt.Sprintf(format, v...))
 }
 
-func (this *Log) Output(calldepth int, s string) error {
+func (this *Logger) Output(calldepth int, s string) error {
 	Output(2+calldepth, "MIX", this.getPrefix(), s)
 	return nil
 }
