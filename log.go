@@ -18,10 +18,19 @@ func NewLogger() *Logger {
 }
 
 func (this *Logger) AppendPrefix(str string) {
+	if str == "" {
+		return
+	}
+
 	if this.hasPrefix == false {
 		this.ResetPrefix()
 	}
-	this.prefixStr = this.prefixStr + " " + str
+
+	if this.prefixStr == "" {
+		this.prefixStr = str
+	} else {
+		this.prefixStr = this.prefixStr + " " + str
+	}
 	this.hasPrefix = true
 }
 
@@ -50,6 +59,10 @@ func (this *Logger) getPrefix() string {
 
 	if this.traceID == "" {
 		return this.prefixStr
+	}
+
+	if this.prefixStr == "" {
+		return "trace_id:" + this.traceID
 	}
 
 	return "trace_id:" + this.traceID + " " + this.prefixStr
