@@ -52,7 +52,7 @@ func (this *Logger) getPrefix() string {
 		return this.prefixStr
 	}
 
-	return "trace_id: " + this.traceID + " " + this.prefixStr
+	return "trace_id:" + this.traceID + " " + this.prefixStr
 }
 
 func (this *Logger) Debug(v ...interface{}) {
