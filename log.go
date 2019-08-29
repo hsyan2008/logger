@@ -21,7 +21,7 @@ func (this *Logger) AppendPrefix(str string) {
 	if this.hasPrefix == false {
 		this.ResetPrefix()
 	}
-	this.prefixStr = fmt.Sprintf("%s %s", this.prefixStr, str)
+	this.prefixStr = this.prefixStr + " " + str
 	this.hasPrefix = true
 }
 
@@ -36,7 +36,11 @@ func (this *Logger) ResetPrefix() {
 }
 
 func (this *Logger) SetTraceID(str string) {
-	this.traceID = fmt.Sprintf("traceid: %s", str)
+	this.traceID = str
+}
+
+func (this *Logger) GetTraceID() string {
+	return this.traceID
 }
 
 func (this *Logger) getPrefix() string {
@@ -48,7 +52,7 @@ func (this *Logger) getPrefix() string {
 		return this.prefixStr
 	}
 
-	return this.traceID + " " + this.prefixStr
+	return "trace_id: " + this.traceID + " " + this.prefixStr
 }
 
 func (this *Logger) Debug(v ...interface{}) {
