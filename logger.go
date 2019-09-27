@@ -169,6 +169,7 @@ func SetRollingDaily(fileName string) {
 	} else {
 		logObj.rename()
 	}
+	go fileMonitor()
 }
 
 func catchError() {
@@ -186,10 +187,7 @@ func Output(calldepth int, level, prefix string, v ...interface{}) {
 	defer catchError()
 
 	//print to file
-	if logObj != nil {
-		if dailyRolling {
-			fileCheck()
-		}
+	if logObj != nil && logObj.lg != nil {
 		_ = logObj.lg.Output(calldepth, getLevelAndPrefix(level, prefix, false)+fmt.Sprintln(v...))
 	}
 	//print to console
@@ -270,23 +268,32 @@ func Mixf(f string, v ...interface{}) {
 	Output(3, "MIX", GetPrefix(), fmt.Sprintf(f, v...))
 }
 
-var checkMustRenameTime int64
-
 func (f *_FILE) isMustRename() bool {
-	now := time.Now()
-	//3秒检查一次，不然太频繁
-	if checkMustRenameTime != 0 && now.Unix()-checkMustRenameTime < 3 {
+	//判断是否还是原来的文件，防止并行下文件已经被处理过
+	fd, err := os.Stat(f.filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			f.initFile()
+		}
 		return false
 	}
-	checkMustRenameTime = now.Unix()
+	curFd, err := f.logfile.Stat()
+	if err != nil {
+		return false
+	}
+	if !os.SameFile(fd, curFd) {
+		f.initFile()
+		return false
+	}
+
 	if dailyRolling {
-		t, _ := time.Parse(DATEFORMAT, now.Format(DATEFORMAT))
+		t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
 		if t.After(*f._date) {
 			return true
 		}
 	} else {
 		if maxFileCount > 1 {
-			if fileSize(f.filePath) >= maxFileSize {
+			if curFd.Size() >= maxFileSize {
 				return true
 			}
 		}
@@ -298,9 +305,6 @@ func (f *_FILE) rename() {
 	if dailyRolling {
 		fn := f.filePath + "." + f._date.Format(DATEFORMAT)
 		if !isExist(fn) {
-			if f.logfile != nil {
-				_ = f.logfile.Close()
-			}
 			err := os.Rename(f.filePath, fn)
 			if err != nil {
 				f.lg.Println("rename err", err.Error())
@@ -320,9 +324,6 @@ func (f *_FILE) nextSuffix() int {
 
 func (f *_FILE) coverNextOne() {
 	f._suffix = f.nextSuffix()
-	if f.logfile != nil {
-		_ = f.logfile.Close()
-	}
 	if isExist(f.filePath + "." + strconv.Itoa(int(f._suffix))) {
 		_ = os.Remove(f.filePath + "." + strconv.Itoa(int(f._suffix)))
 	}
@@ -331,16 +332,17 @@ func (f *_FILE) coverNextOne() {
 }
 
 func (f *_FILE) initFile() {
-	f.logfile, _ = os.OpenFile(f.filePath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
-	f.lg = log.New(f.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
-}
-
-func fileSize(file string) int64 {
-	f, e := os.Stat(file)
-	if e != nil {
-		return 0
+	oldFd := f.logfile
+	var err error
+	f.logfile, err = os.OpenFile(f.filePath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	if err != nil {
+		Warn(err)
+		return
 	}
-	return f.Size()
+	f.lg = log.New(f.logfile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	if oldFd != nil {
+		_ = oldFd.Close()
+	}
 }
 
 func isExist(path string) bool {
@@ -348,7 +350,13 @@ func isExist(path string) bool {
 	return err == nil || os.IsExist(err)
 }
 
+var isFileMonitor bool
+
 func fileMonitor() {
+	if isFileMonitor {
+		return
+	}
+	isFileMonitor = true
 	timer := time.NewTicker(1 * time.Second)
 	for {
 		select {
@@ -361,7 +369,7 @@ func fileMonitor() {
 func fileCheck() {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err)
+			Warn(err)
 		}
 	}()
 	if logObj != nil && logObj.isMustRename() {
