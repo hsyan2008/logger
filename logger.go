@@ -125,19 +125,6 @@ func SetRollingFile(fileName string, maxNumber int32, maxSize int64, unit string
 	}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
-	//找出最新日志的序号
-	var maxTime int64
-	for i := 1; i <= int(maxNumber); i++ {
-		filePath := logObj.filePath + "." + strconv.Itoa(i)
-		fi, err := os.Stat(filePath)
-		if err != nil {
-			break
-		}
-		if fi.ModTime().UnixNano() > maxTime {
-			maxTime = fi.ModTime().UnixNano()
-			logObj._suffix = i
-		}
-	}
 	if !logObj.isMustRename() {
 		logObj.initFile()
 	} else {
@@ -298,10 +285,8 @@ func (f *_FILE) isMustRename() bool {
 			return true
 		}
 	} else {
-		if maxFileCount > 1 {
-			if curFd.Size() >= maxFileSize {
-				return true
-			}
+		if maxFileCount > 1 && curFd.Size() >= maxFileSize {
+			return true
 		}
 	}
 	return false
@@ -325,6 +310,19 @@ func (f *_FILE) rename() {
 }
 
 func (f *_FILE) nextSuffix() int {
+	//找出最新日志的序号
+	var maxTime int64
+	for i := 1; i <= int(maxFileCount); i++ {
+		filePath := f.filePath + "." + strconv.Itoa(i)
+		fi, err := os.Stat(filePath)
+		if err != nil {
+			break
+		}
+		if fi.ModTime().UnixNano() > maxTime {
+			maxTime = fi.ModTime().UnixNano()
+			f._suffix = i
+		}
+	}
 	return int(f._suffix%int(maxFileCount) + 1)
 }
 
