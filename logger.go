@@ -125,11 +125,17 @@ func SetRollingFile(fileName string, maxNumber int32, maxSize int64, unit string
 	}
 	logObj.mu.Lock()
 	defer logObj.mu.Unlock()
+	//找出最新日志的序号
+	var maxTime int64
 	for i := 1; i <= int(maxNumber); i++ {
-		if isExist(logObj.filePath + "." + strconv.Itoa(i)) {
-			logObj._suffix = i
-		} else {
+		filePath := logObj.filePath + "." + strconv.Itoa(i)
+		fi, err := os.Stat(filePath)
+		if err != nil {
 			break
+		}
+		if fi.ModTime().UnixNano() > maxTime {
+			maxTime = fi.ModTime().UnixNano()
+			logObj._suffix = i
 		}
 	}
 	if !logObj.isMustRename() {
