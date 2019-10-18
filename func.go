@@ -4,6 +4,10 @@ package logger
 
 import "syscall"
 
+func init() {
+	_ = syscall.Umask(011)
+}
+
 func fileCheck() {
 	defer func() {
 		if err := recover(); err != nil {
