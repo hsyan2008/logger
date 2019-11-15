@@ -173,19 +173,29 @@ func catchError() {
 
 func Output(calldepth int, level, prefix string, v ...interface{}) {
 	l := getLogLevel(level)
-	if l == OFF || logLevel > l {
+	if logLevel == OFF || logLevel > l {
 		return
 	}
 
 	defer catchError()
 
+	var str string
+	if len(v) == 1 {
+		var ok bool
+		if str, ok = v[0].(string); !ok {
+			str = fmt.Sprintln(v...)
+		}
+	} else {
+		str = fmt.Sprintln(v...)
+	}
+
 	//print to file
 	if logObj != nil && logObj.lg != nil {
-		_ = logObj.lg.Output(calldepth, getLevelAndPrefix(level, prefix, false)+fmt.Sprintln(v...))
+		_ = logObj.lg.Output(calldepth, getLevelAndPrefix(level, prefix, false)+str)
 	}
 	//print to console
 	if consoleAppender {
-		_ = logConsole.Output(calldepth, getLevelAndPrefix(level, prefix, true)+fmt.Sprintln(v...))
+		_ = logConsole.Output(calldepth, getLevelAndPrefix(level, prefix, true)+str)
 	}
 }
 
@@ -225,39 +235,75 @@ func getColor(level string) string {
 }
 
 func Debug(v ...interface{}) {
+	if logLevel == OFF || logLevel > DEBUG {
+		return
+	}
 	Output(3, "DEBUG", GetPrefix(), v...)
 }
 func Debugf(f string, v ...interface{}) {
+	if logLevel == OFF || logLevel > DEBUG {
+		return
+	}
 	Output(3, "DEBUG", GetPrefix(), fmt.Sprintf(f, v...))
 }
 func Info(v ...interface{}) {
+	if logLevel == OFF || logLevel > INFO {
+		return
+	}
 	Output(3, "INFO", GetPrefix(), v...)
 }
 func Infof(f string, v ...interface{}) {
+	if logLevel == OFF || logLevel > INFO {
+		return
+	}
 	Output(3, "INFO", GetPrefix(), fmt.Sprintf(f, v...))
 }
 func Warn(v ...interface{}) {
+	if logLevel == OFF || logLevel > WARN {
+		return
+	}
 	Output(3, "WARN", GetPrefix(), v...)
 }
 func Warnf(f string, v ...interface{}) {
+	if logLevel == OFF || logLevel > WARN {
+		return
+	}
 	Output(3, "WARN", GetPrefix(), fmt.Sprintf(f, v...))
 }
 func Error(v ...interface{}) {
+	if logLevel == OFF || logLevel > ERROR {
+		return
+	}
 	Output(3, "ERROR", GetPrefix(), v...)
 }
 func Errorf(f string, v ...interface{}) {
+	if logLevel == OFF || logLevel > ERROR {
+		return
+	}
 	Output(3, "ERROR", GetPrefix(), fmt.Sprintf(f, v...))
 }
 func Fatal(v ...interface{}) {
+	if logLevel == OFF || logLevel > FATAL {
+		return
+	}
 	Output(3, "FATAL", GetPrefix(), v...)
 }
 func Fatalf(f string, v ...interface{}) {
+	if logLevel == OFF || logLevel > FATAL {
+		return
+	}
 	Output(3, "FATAL", GetPrefix(), fmt.Sprintf(f, v...))
 }
 func Mix(v ...interface{}) {
+	if logLevel == OFF || logLevel > MIX {
+		return
+	}
 	Output(3, "MIX", GetPrefix(), v...)
 }
 func Mixf(f string, v ...interface{}) {
+	if logLevel == OFF || logLevel > MIX {
+		return
+	}
 	Output(3, "MIX", GetPrefix(), fmt.Sprintf(f, v...))
 }
 
