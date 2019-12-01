@@ -19,7 +19,7 @@ const (
 
 type LEVEL int32
 
-var logLevel LEVEL = 1
+var logLevel LEVEL
 var maxFileSize int64
 var maxFileCount int32
 var dailyRolling bool = true
