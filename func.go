@@ -5,7 +5,7 @@ package logger
 import "syscall"
 
 func init() {
-	_ = syscall.Umask(011)
+	_ = syscall.Umask(000)
 }
 
 func fileCheck() {
