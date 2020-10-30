@@ -58,7 +58,11 @@ func (this *Logger) GetTraceID() string {
 	return this.traceID
 }
 
-func (this *Logger) getPrefix() string {
+func (this *Logger) GetPrefix() string {
+	return this.prefixStr
+}
+
+func (this *Logger) getFullPrefix() string {
 	if this.hasPrefix == false {
 		this.ResetPrefix()
 	}
@@ -78,87 +82,87 @@ func (this *Logger) Debug(v ...interface{}) {
 	if logLevel == OFF || logLevel > DEBUG {
 		return
 	}
-	Output(this.calldepth+1, "DEBUG", this.getPrefix(), v...)
+	Output(this.calldepth+1, "DEBUG", this.getFullPrefix(), v...)
 }
 
 func (this *Logger) Debugf(format string, v ...interface{}) {
 	if logLevel == OFF || logLevel > DEBUG {
 		return
 	}
-	Output(this.calldepth+1, "DEBUG", this.getPrefix(), fmt.Sprintf(format, v...))
+	Output(this.calldepth+1, "DEBUG", this.getFullPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Info(v ...interface{}) {
 	if logLevel == OFF || logLevel > INFO {
 		return
 	}
-	Output(this.calldepth+1, "INFO", this.getPrefix(), v...)
+	Output(this.calldepth+1, "INFO", this.getFullPrefix(), v...)
 }
 
 func (this *Logger) Infof(format string, v ...interface{}) {
 	if logLevel == OFF || logLevel > INFO {
 		return
 	}
-	Output(this.calldepth+1, "INFO", this.getPrefix(), fmt.Sprintf(format, v...))
+	Output(this.calldepth+1, "INFO", this.getFullPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Warn(v ...interface{}) {
 	if logLevel == OFF || logLevel > WARN {
 		return
 	}
-	Output(this.calldepth+1, "WARN", this.getPrefix(), v...)
+	Output(this.calldepth+1, "WARN", this.getFullPrefix(), v...)
 }
 
 func (this *Logger) Warnf(format string, v ...interface{}) {
 	if logLevel == OFF || logLevel > WARN {
 		return
 	}
-	Output(this.calldepth+1, "WARN", this.getPrefix(), fmt.Sprintf(format, v...))
+	Output(this.calldepth+1, "WARN", this.getFullPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Error(v ...interface{}) {
 	if logLevel == OFF || logLevel > ERROR {
 		return
 	}
-	Output(this.calldepth+1, "ERROR", this.getPrefix(), v...)
+	Output(this.calldepth+1, "ERROR", this.getFullPrefix(), v...)
 }
 
 func (this *Logger) Errorf(format string, v ...interface{}) {
 	if logLevel == OFF || logLevel > ERROR {
 		return
 	}
-	Output(this.calldepth+1, "ERROR", this.getPrefix(), fmt.Sprintf(format, v...))
+	Output(this.calldepth+1, "ERROR", this.getFullPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Fatal(v ...interface{}) {
 	if logLevel == OFF || logLevel > FATAL {
 		return
 	}
-	Output(this.calldepth+1, "FATAL", this.getPrefix(), v...)
+	Output(this.calldepth+1, "FATAL", this.getFullPrefix(), v...)
 }
 
 func (this *Logger) Fatalf(format string, v ...interface{}) {
 	if logLevel == OFF || logLevel > FATAL {
 		return
 	}
-	Output(this.calldepth+1, "FATAL", this.getPrefix(), fmt.Sprintf(format, v...))
+	Output(this.calldepth+1, "FATAL", this.getFullPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Mix(v ...interface{}) {
 	if logLevel == OFF || logLevel > MIX {
 		return
 	}
-	Output(this.calldepth+1, "MIX", this.getPrefix(), v...)
+	Output(this.calldepth+1, "MIX", this.getFullPrefix(), v...)
 }
 
 func (this *Logger) Mixf(format string, v ...interface{}) {
 	if logLevel == OFF || logLevel > MIX {
 		return
 	}
-	Output(this.calldepth+1, "MIX", this.getPrefix(), fmt.Sprintf(format, v...))
+	Output(this.calldepth+1, "MIX", this.getFullPrefix(), fmt.Sprintf(format, v...))
 }
 
 func (this *Logger) Output(calldepth int, s string) error {
-	Output(this.calldepth+calldepth, "MIX", this.getPrefix(), s)
+	Output(this.calldepth+calldepth, "MIX", this.getFullPrefix(), s)
 	return nil
 }
